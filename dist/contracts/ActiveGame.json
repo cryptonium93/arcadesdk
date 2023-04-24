@@ -1,0 +1,97 @@
+{
+    "name": "ActiveGame",
+    "methods": [
+        {
+            "name": "create",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "cost"
+                },
+                {
+                    "type": "string",
+                    "name": "settings"
+                },
+                {
+                    "type": "address",
+                    "name": "owner"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_arcade",
+            "args": [
+                {
+                    "type": "application",
+                    "name": "arcade"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "arcade_start",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "token"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "play",
+            "args": [],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "submit_score",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "score"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "signature"
+                },
+                {
+                    "type": "asset",
+                    "name": "asa"
+                },
+                {
+                    "type": "application",
+                    "name": "arcade"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "results",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "tickets"
+                },
+                {
+                    "type": "byte[64]",
+                    "name": "signature"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}
