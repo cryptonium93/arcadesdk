@@ -89,13 +89,15 @@ function hexToBytes(hex) {
     return bytes;
 }
 export class ActiveGame {
-    constructor(appID, algodURL) {
+    constructor(appID, algodServer, algodPort) {
         this.appID = appID;
-        if (!!!algodURL) {
-            algodURL = 'https://node.testnet.algoexplorerapi.io';
-            algodURL = 'https://localhost';
+        if (!!!algodServer) {
+            algodServer = 'https://node.testnet.algoexplorerapi.io';
         }
-        this.algodClient = new algosdk.Algodv2('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', algodURL, 8445);
+        if (!!!algodPort) {
+            algodPort = 443;
+        }
+        this.algodClient = new algosdk.Algodv2('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', algodServer, algodPort);
     }
     async playGame(signer, address) {
         const appID = this.appID;

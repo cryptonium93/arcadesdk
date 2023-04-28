@@ -1,0 +1,30 @@
+{
+    "name": "GameFactory",
+    "methods": [
+        {
+            "name": "create_game",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                },
+                {
+                    "type": "string",
+                    "name": "url"
+                },
+                {
+                    "type": "uint64",
+                    "name": "game_type"
+                },
+                {
+                    "type": "uint64",
+                    "name": "embed"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            }
+        }
+    ],
+    "networks": {}
+}

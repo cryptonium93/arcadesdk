@@ -2,7 +2,7 @@ import algosdk from 'algosdk';
 export declare class ActiveGame {
     appID: number;
     algodClient: algosdk.Algodv2;
-    constructor(appID: number, algodURL?: string);
+    constructor(appID: number, algodServer?: string, algodPort?: number);
     playGame(signer: algosdk.TransactionSigner, address: string): Promise<{
         nonce: number;
     }>;

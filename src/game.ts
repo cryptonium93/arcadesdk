@@ -113,17 +113,20 @@ export class ActiveGame {
   appID: number;
   algodClient: algosdk.Algodv2
 
-  constructor(appID: number, algodURL?: string) {
+  constructor(appID: number, algodServer?: string, algodPort?: number) {
     this.appID = appID
-    if (!!!algodURL) {
-      algodURL = 'https://node.testnet.algoexplorerapi.io'
-      algodURL = 'https://localhost'
+    if (!!!algodServer) {
+      algodServer = 'https://node.testnet.algoexplorerapi.io'
+    }
+
+    if (!!!algodPort) {
+      algodPort = 443
     }
 
     this.algodClient = new algosdk.Algodv2(
       'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      algodURL,
-      8445
+      algodServer,
+      algodPort
     );
   }
 

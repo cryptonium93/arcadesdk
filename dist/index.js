@@ -1,7 +1,9 @@
 import { ActiveGame } from './game';
+import { GameFactory } from './gameFactory';
 //import {sayHello, sayGoodbye} from './hello-world'
 const arcadesdk = {
     ActiveGame,
+    GameFactory,
     //sayHello,
     //sayGoodbye
 };
