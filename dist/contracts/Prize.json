@@ -1,0 +1,53 @@
+{
+    "name": "Prize",
+    "methods": [
+        {
+            "name": "setup",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "prize"
+                },
+                {
+                    "type": "asset",
+                    "name": "ticket"
+                },
+                {
+                    "type": "uint64",
+                    "name": "price"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "finalize",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "delete",
+            "args": [
+                {
+                    "type": "application",
+                    "name": "arcade"
+                },
+                {
+                    "type": "asset",
+                    "name": "prize"
+                },
+                {
+                    "type": "asset",
+                    "name": "ticket"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}

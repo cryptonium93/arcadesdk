@@ -1,0 +1,160 @@
+{
+    "name": "Arcade",
+    "methods": [
+        {
+            "name": "create",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                },
+                {
+                    "type": "string",
+                    "name": "url"
+                },
+                {
+                    "type": "address",
+                    "name": "owner"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "withdraw",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "amount"
+                },
+                {
+                    "type": "address",
+                    "name": "to"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_game_factory",
+            "args": [
+                {
+                    "type": "application",
+                    "name": "factory"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "add_prize",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "prize"
+                },
+                {
+                    "type": "asset",
+                    "name": "ticket"
+                },
+                {
+                    "type": "uint64",
+                    "name": "price"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "create_tickets",
+            "args": [],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "create_ticket",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "url"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "add_game",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "token"
+                },
+                {
+                    "type": "application",
+                    "name": "game"
+                },
+                {
+                    "type": "uint64",
+                    "name": "cost"
+                },
+                {
+                    "type": "string",
+                    "name": "settings"
+                },
+                {
+                    "type": "application",
+                    "name": "factory"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "activate_game",
+            "args": [
+                {
+                    "type": "application",
+                    "name": "game"
+                },
+                {
+                    "type": "string",
+                    "name": "token"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "remove_game",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "disperse",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "to"
+                },
+                {
+                    "type": "uint64",
+                    "name": "amt"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}

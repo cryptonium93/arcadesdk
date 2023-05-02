@@ -1,0 +1,22 @@
+{
+    "name": "ArcadeFactory",
+    "methods": [
+        {
+            "name": "create_arcade",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                },
+                {
+                    "type": "string",
+                    "name": "url"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            }
+        }
+    ],
+    "networks": {}
+}

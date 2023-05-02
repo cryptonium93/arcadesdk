@@ -1,89 +1,6 @@
 import algosdk from 'algosdk'
 import ActiveGameABI from './contracts/ActiveGame.json'
-
-const algodClient = new algosdk.Algodv2(
-  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  'https://localhost/',
-  8445
-);
-
-const indexerClient = new algosdk.Indexer(
-  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  'https://localhost/indexer',
-  8445
-);
-
-type TealKeyValueStore = algosdk.modelsv2.TealKeyValue[]
-const getValue = (state: TealKeyValueStore, key: string) => {
-  if (!!!state) {
-    return null
-  }
-
-  const kv = state.find(el => atob(el.key) == key)
-  if (!!kv) {
-    return kv.value
-  } else {
-    return null
-  }
-}
-const getString = (state: TealKeyValueStore, key: string) => {
-  const kv = getValue(state, key)
-  if (!!kv) {
-    return kv.bytes
-  } else {
-    return ""
-  }
-}
-
-const getUint = (state: TealKeyValueStore, key: string) => {
-  const kv = getValue(state, key)
-  if (!!kv) {
-    return kv.uint
-  } else {
-    return 0
-  }
-}
-
-const getGlobalState = async(appID: number) => {
-  const app = await indexerClient.lookupApplications(appID).do();
-  const state = app['application']['params']['global-state']
-  return state
-}
-
-const getOptedInRound = async(address: string, appID: number) => {
-  if (!!!address) {
-    return 0
-  }
-
-  const resp = await indexerClient.lookupAccountAppLocalStates(address).limit(1000).do();
-  const accountAppLocalStates = algosdk.indexerModels.ApplicationLocalStatesResponse.from_obj_for_encoding(resp)
-  let local = accountAppLocalStates.appsLocalStates
-  const state = local.find(el => el.id === appID)
-  if (!!!state) {
-    return 0
-  } else {
-    return state.optedInAtRound
-  }
-}
-
-const getLocalState = async(address: string, appID: number) => {
-  if (!!!address) {
-    return null
-  }
-
-  const resp = await indexerClient.lookupAccountAppLocalStates(address).limit(1000).do();
-  if (!!!resp) {
-    return null
-  }
-
-  const accountAppLocalStates = algosdk.indexerModels.ApplicationLocalStatesResponse.from_obj_for_encoding(resp)
-  let local = accountAppLocalStates.appsLocalStates
-  const state = local.find(el => el.id === appID)
-  if (!!!state) {
-    return null
-  }
-  return state.keyValue
-}
+import { Base } from './base'
 
 function getMethodByName(abi: algosdk.ABIContractParams, name: string): algosdk.ABIMethod  {
   const contract = new algosdk.ABIContract(abi)
@@ -109,25 +26,58 @@ function hexToBytes(hex: string) {
 }
 
 
-export class ActiveGame {
-  appID: number;
-  algodClient: algosdk.Algodv2
-
-  constructor(appID: number, algodServer?: string, algodPort?: number) {
-    this.appID = appID
-    if (!!!algodServer) {
-      algodServer = 'https://node.testnet.algoexplorerapi.io'
+export class ActiveGame extends Base {
+  async playGame2(signer: algosdk.TransactionSigner, address: string) {
+    const appID: number = this.appID;
+    const appAddr = algosdk.getApplicationAddress(appID)
+    const sp = await this.algodClient.getTransactionParams().do();
+    const atc = new algosdk.AtomicTransactionComposer();
+    const ptxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({amount: 1000000, from: address, suggestedParams: sp, to: appAddr})
+    const tws = {txn: ptxn, signer: signer}
+    const txns: algosdk.Transaction[] = []
+    txns.push(ptxn);
+    const commonParams = {
+      appID: appID,
+      sender: address,
+      suggestedParams: sp,
+      signer: signer
+    };
+    let round = await this.state.getOptedInRound(address, appID);
+    if (round == 0) {
+      const otxn = algosdk.makeApplicationOptInTxnFromObject({ appIndex: appID, from: address, suggestedParams: sp });
+      const otws = { txn: otxn, signer: signer };
+      atc.addTransaction(otws);
+      txns.push(otxn)
     }
+    atc.addTransaction(tws);
+    atc.addMethodCall({ method: getMethodByName(ActiveGameABI, "play"), ...commonParams });
+    try {
+      const contract = new algosdk.ABIContract(ActiveGameABI);
+      const method = contract.getMethodByName("play")
+      const atxn = algosdk.makeApplicationCallTxnFromObject(
+        {from: address, appIndex: appID, suggestedParams: sp, onComplete: algosdk.OnApplicationComplete.NoOpOC, appArgs: [method.getSelector()]}
+      )
+      txns.push(atxn)
 
-    if (!!!algodPort) {
-      algodPort = 443
+      const txnGroup = algosdk.assignGroupID(txns)
+      const stxns = await signer(txnGroup, [])
+      let encTxns = stxns.map((stxn) => Buffer.from(stxn).toString('base64'))
+      let transactions = {transactions: encTxns}
+        console.log("json " + JSON.stringify(transactions))
+      let resp = await fetch(window.location.origin+"/arcade/v1/play", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(transactions),
+      })
+
+      let j = await resp.json()
+      return ({ round: j.confirmedRound, nonce: j.nonce});
+    } catch (e) {
+      console.log("catch error " + e)
+      return ({ round: 0, nonce: 0 });
     }
-
-    this.algodClient = new algosdk.Algodv2(
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      algodServer,
-      algodPort
-    );
   }
 
   async playGame(signer: algosdk.TransactionSigner, address: string) {
@@ -145,7 +95,7 @@ export class ActiveGame {
       signer: signer
     }
 
-    let round = await getOptedInRound(address, appID)
+    let round = await this.state.getOptedInRound(address, appID)
     if (round == 0) {
       const otxn = algosdk.makeApplicationOptInTxnFromObject({appIndex: appID, from: address, suggestedParams: sp})
       const otws = {txn: otxn, signer: signer}
@@ -156,16 +106,20 @@ export class ActiveGame {
 
 
     atc.addMethodCall({method: getMethodByName(ActiveGameABI, "play"), ...commonParams})
-    let result = await atc.execute(this.algodClient, 3)
-    let nonce = result.methodResults[0].rawReturnValue
 
-    return ({nonce: parseInt(result.methodResults[0].returnValue as string)})
+    try {
+      let result = await atc.execute(this.algodClient, 3)
+      let nonce = result.methodResults[0].rawReturnValue
+      return ({round: result.confirmedRound, nonce: parseInt(result.methodResults[0].returnValue as string)})
+    } catch(e) {
+      return ({round: 0, nonce: 0})
+    }
   }
 
   async closeGame(signer: algosdk.TransactionSigner, address: string) {
     const appID = this.appID
     const appAddr = algosdk.getApplicationAddress(appID)
-    const sp = await algodClient.getTransactionParams().do();
+    const sp = await this.algodClient.getTransactionParams().do();
     const atc = new algosdk.AtomicTransactionComposer();
     const note = new Uint8Array(2);
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({appIndex: appID, from: address, suggestedParams: sp, note: note})
@@ -185,14 +139,18 @@ export class ActiveGame {
     atc.addTransaction(tws0)
     atc.addTransaction(tws1)
     atc.addMethodCall({method: getMethodByName(ActiveGameABI, "results"), methodArgs: [0, empty()], ...commonParams})
-    let result = await atc.execute(algodClient, 3)
-    return result.methodResults[0].returnValue
+    try {
+      let result = await atc.execute(this.algodClient, 3)
+      return ({round: result.confirmedRound})
+    } catch(e) {
+      return ({round: 0})
+    }
   }
 
   async submitScore(signer: algosdk.TransactionSigner, address: string, score: number, signature: string) {
     const appID = this.appID
     const appAddr = algosdk.getApplicationAddress(appID)
-    const sp = await algodClient.getTransactionParams().do();
+    const sp = await this.algodClient.getTransactionParams().do();
 
     const note = new Uint8Array(2);
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({appIndex: appID, from: address, suggestedParams: sp, note: note})
@@ -217,19 +175,26 @@ export class ActiveGame {
       suggestedParams: sp,
       signer: signer
     }
-    const sig = hexToBytes(signature)
+    sp.flatFee = true;
+    sp.fee = 2 * 1000;
 
-    let state = await getGlobalState(appID)
-    const arcade = getUint(state, "arcade")
-    state = await getGlobalState((arcade as number))
-    const ticket = getUint(state, "ticket")
+    const sig = hexToBytes(signature)
+    let state = await this.state.getGlobalState(appID)
+    const arcade = this.state.getUint(state, "arcade")
+    state = await this.state.getGlobalState((arcade as number))
+    const ticket = this.state.getUint(state, "ticket")
+
+    const otxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({from: address, to: address, suggestedParams: sp, assetIndex: Number(ticket), amount: 0})
+    const otws = { txn: otxn, signer: signer };
+    atc.addTransaction(otws);
+
     atc.addMethodCall({method: getMethodByName(ActiveGameABI, "submit_score"), methodArgs: [score, sig, ticket, arcade], ...commonParams})
 
     try {
-      let result = await atc.execute(algodClient, 5)
-      return result.methodResults[0].returnValue
+      let result = await atc.execute(this.algodClient, 5)
+      return ({round: result.confirmedRound, tickets: result.methodResults[0].returnValue})
     } catch (err) {
-      return 0
+      return ({round: 0})
     }
   }
 }
