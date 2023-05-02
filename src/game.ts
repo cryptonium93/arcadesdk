@@ -49,7 +49,7 @@ export class ActiveGame extends Base {
       const atc = new algosdk.AtomicTransactionComposer();
       atc.addTransaction(otws);
       await atc.execute(this.algodClient, 3);
-      txns.push(otxn)
+      //txns.push(otxn)
     }
     atc.addTransaction(tws);
     atc.addMethodCall({ method: getMethodByName(ActiveGameABI, "play"), ...commonParams });
