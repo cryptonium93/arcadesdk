@@ -46,7 +46,9 @@ export class ActiveGame extends Base {
     if (round == 0) {
       const otxn = algosdk.makeApplicationOptInTxnFromObject({ appIndex: appID, from: address, suggestedParams: sp });
       const otws = { txn: otxn, signer: signer };
+      const atc = new algosdk.AtomicTransactionComposer();
       atc.addTransaction(otws);
+      await atc.execute(this.algodClient, 3);
       txns.push(otxn)
     }
     atc.addTransaction(tws);

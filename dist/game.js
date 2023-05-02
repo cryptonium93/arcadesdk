@@ -43,7 +43,7 @@ export class ActiveGame extends Base {
             const otws = { txn: otxn, signer: signer };
             const atc = new algosdk.AtomicTransactionComposer();
             atc.addTransaction(otws);
-            await atc.execute(this.aglodClient, 3);
+            await atc.execute(this.algodClient, 3);
             txns.push(otxn);
         }
         atc.addTransaction(tws);
@@ -170,9 +170,7 @@ export class ActiveGame extends Base {
         atc.addMethodCall({ method: getMethodByName(ActiveGameABI, "submit_score"), methodArgs: [score, sig, ticket, arcade], ...commonParams });
         try {
             let result = await atc.execute(this.algodClient, 5);
-          console.log("submit results")
-          console.log(result)
-            return ({ round: result.confirmedRound, tickets: result.methodResults[0].returnValue});
+            return ({ round: result.confirmedRound, tickets: result.methodResults[0].returnValue });
         }
         catch (err) {
             return ({ round: 0 });
