@@ -16,10 +16,16 @@ export class Base {
           algodToken = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         }
         */
-        const indexerServer = 'https://localhost/indexer';
-        const algodServer = 'https://localhost';
-        const algodPort = 8446;
-        const algodToken = 'c5099e86d788e329a2d736f42fb107f08985b3124e76245344d64ff4528cbe2b';
+        /*
+         const indexerServer = 'https://localhost/indexer'
+         const algodServer = 'https://localhost'
+         const algodPort = 8446
+         const algodToken = 'c5099e86d788e329a2d736f42fb107f08985b3124e76245344d64ff4528cbe2b'
+        */
+        const indexerServer = "https://btftlabs.xyz/indexer";
+        const algodServer = "https://btftlabs.xyz";
+        const algodPort = 443;
+        const algodToken = "";
         if (!!algodClient) {
             this.algodClient = algodClient;
         }
